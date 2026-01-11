@@ -56,12 +56,12 @@ def URL_DELETE(short_code):
 #     results.append(f"shorten {long_url} to {code}")
 #     return code
 
-def URL_CLICK(short_code):
-    if short_code not in dic:
-        results.append("error: code not found")
-        return None
-    dic[short_code]['clicks'] += 1
-    results.append(f"increment click of {short_code}")
+# def URL_CLICK(short_code):
+#     if short_code not in dic:
+#         results.append("error: code not found")
+#         return None
+#     dic[short_code]['clicks'] += 1
+#     results.append(f"increment click of {short_code}")
 
 def URL_STATS(short_code):
     if short_code not in dic:
@@ -74,7 +74,7 @@ def URL_TOP(n):
     temp = []
     res = []
     for url in dic:
-        temp.append([dic[url]['url'], dic[url]['clicks']])
+        temp.append([url, dic[url]['clicks']])
     temp = sorted(temp, key = lambda x: x[1])
     for i in range(n):
         res.append(temp[i])
@@ -155,7 +155,7 @@ def URL_CLICK(short_code):
         results.append(f'click routed to: {short_code} version: {chosen_v}')
     else:
         dic[short_code]['clicks'] += 1
-        results.append(f'click routed to: {short_code} version: v1')
+        results.append(f"clicked {short_code}")
 
 def URL_VERSION_STATS(short_code):
     if short_code not in dic:
@@ -194,8 +194,12 @@ def simulate_coding_framework(list_of_lists):
         if operation == "URL_SHORTEN":
             if len(command) == 2:
                 URL_SHORTEN(command[1])
-            else:
+            elif len(command) == 3:
                 URL_SHORTEN(command[1], command[2])
+            elif len(command) == 4:
+                URL_SHORTEN(command[1], command[2], command[3])
+            elif len(command) == 5:
+                URL_SHORTEN(command[1], command[2], command[3], command[4])
         elif operation == "URL_EXPAND":
             URL_EXPAND(command[1])
         elif operation == "URL_DELETE":
@@ -220,3 +224,288 @@ def simulate_coding_framework(list_of_lists):
             URL_SET_SPLIT(command[1], command[2])
     
     return results
+
+
+"""
+URL Shortener Service - Test Cases for All Levels
+"""
+
+import unittest
+from sim import simulate_coding_framework
+
+class TestURLShortener(unittest.TestCase):
+    
+    # ========== LEVEL 1 TESTS ==========
+    
+    def test_level1_basic_shorten_expand(self):
+        """Test basic URL shortening and expansion"""
+        commands = [
+            ["URL_SHORTEN", "https://www.google.com"],
+            ["URL_EXPAND", "CODE1"],  # Will fail - code is random
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # Can't test exact code since it's random
+        self.assertTrue(output[0].startswith("shortened to"))
+        # Note: This test is incomplete - in real tests you'd capture the returned code
+    
+    def test_level1_delete(self):
+        """Test deleting a shortened URL"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com"],
+            ["URL_DELETE", "abc123"],  # Assume we know the code
+        ]
+        
+        # Note: Can't fully test without knowing generated code
+        # In practice, you'd mock random or use custom codes
+    
+    # ========== LEVEL 2 TESTS ==========
+    
+    def test_level2_custom_code(self):
+        """Test custom short codes"""
+        commands = [
+            ["URL_SHORTEN", "https://www.example.com", "mycustom"],
+            ["URL_EXPAND", "mycustom"],
+            ["URL_DELETE", "mycustom"],
+            ["URL_EXPAND", "mycustom"]
+        ]
+        
+        expected = [
+            "shortened to mycustom",
+            "expanded mycustom",
+            "deleted mycustom",
+            "error: code not found"
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output, expected)
+    
+    def test_level2_duplicate_custom_code(self):
+        """Test creating duplicate custom code"""
+        commands = [
+            ["URL_SHORTEN", "https://example1.com", "test123"],
+            ["URL_SHORTEN", "https://example2.com", "test123"]
+        ]
+        
+        expected = [
+            "shortened to test123",
+            "error: code already exists"
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output, expected)
+    
+    def test_level2_clicks(self):
+        """Test click tracking"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "click1"],
+            ["URL_CLICK", "click1"],
+            ["URL_CLICK", "click1"],
+            ["URL_CLICK", "click1"],
+            ["URL_STATS", "click1"]
+        ]
+        
+        expected = [
+            "shortened to click1",
+            "click routed to: click1 version: v1",
+            "click routed to: click1 version: v1",
+            "click routed to: click1 version: v1",
+            "stats click1: 3 clicks"  # Adjust format based on your implementation
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # Check first 4 outputs, stats format may vary
+        self.assertEqual(output[:4], expected[:4])
+        self.assertIn("3", output[4])  # Should contain click count
+    
+    def test_level2_top_urls(self):
+        """Test getting top N URLs by clicks"""
+        commands = [
+            ["URL_SHORTEN", "https://url1.com", "code1"],
+            ["URL_SHORTEN", "https://url2.com", "code2"],
+            ["URL_SHORTEN", "https://url3.com", "code3"],
+            ["URL_CLICK", "code1"],
+            ["URL_CLICK", "code1"],
+            ["URL_CLICK", "code1"],
+            ["URL_CLICK", "code2"],
+            ["URL_CLICK", "code2"],
+            ["URL_CLICK", "code3"],
+            ["URL_TOP", 2]
+        ]
+        
+        # Top 2 should be code1 (3 clicks) and code2 (2 clicks)
+        output = simulate_coding_framework(commands)
+        # Check that top command was executed
+        self.assertTrue(any("top" in str(o).lower() for o in output))
+    
+    # ========== LEVEL 3 TESTS ==========
+    
+    def test_level3_user_tracking(self):
+        """Test user-based URL tracking"""
+        commands = [
+            ["URL_SHORTEN", "https://url1.com", "u1code1", "user1"],
+            ["URL_SHORTEN", "https://url2.com", "u1code2", "user1"],
+            ["URL_SHORTEN", "https://url3.com", "u2code1", "user2"],
+            ["URL_USER_LIST", "user1"],
+            ["URL_USER_LIST", "user2"],
+            ["URL_USER_LIST", "user999"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # User1 should have 2 URLs
+        self.assertIn("user1", output[3])
+        # User999 should have none
+        self.assertIn("doesn't exist", output[5])
+    
+    def test_level3_ttl_expiration(self):
+        """Test URL expiration with TTL"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "ttl1", "user1", 3600],  # 1 hour TTL
+            ["URL_EXPAND_AT", "2024-01-01T10:00:00", "ttl1"],  # Within TTL
+            ["URL_EXPAND_AT", "2024-01-01T12:00:00", "ttl1"]   # After TTL (2 hours later)
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # First expand should be valid
+        self.assertIn("valid", output[1])
+        # Second expand should be invalid/expired
+        self.assertIn("invalid", output[2])
+    
+    def test_level3_ttl_infinite(self):
+        """Test URL with no expiration (ttl=None)"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "infinite", "user1"],  # No TTL
+            ["URL_EXPAND_AT", "2030-01-01T10:00:00", "infinite"]  # Far future
+        ]
+        
+        expected = [
+            "shortened to infinite",
+            "valid time"  # Should always be valid
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output, expected)
+    
+    def test_level3_renew_ttl(self):
+        """Test renewing TTL"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "renew1", "user1", 100],
+            ["URL_RENEW", "renew1", 5000],
+            ["URL_RENEW", "nonexistent", 1000]
+        ]
+        
+        expected = [
+            "shortened to renew1",
+            "new ttl for renew1",
+            "error: code not found"
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output, expected)
+    
+    # ========== LEVEL 4 TESTS ==========
+    
+    def test_level4_create_version(self):
+        """Test creating A/B test version"""
+        commands = [
+            ["URL_SHORTEN", "https://version-a.com", "ab1"],
+            ["URL_CREATE_VERSION", "ab1", "https://version-b.com", 50],
+            ["URL_VERSION_STATS", "ab1"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output[0], "shortened to ab1")
+        self.assertIn("version 2", output[1].lower())
+        self.assertIn("v1=0", output[2])
+        self.assertIn("v2=0", output[2])
+    
+    def test_level4_ab_testing_clicks(self):
+        """Test A/B testing with clicks"""
+        commands = [
+            ["URL_SHORTEN", "https://version-a.com", "ab2"],
+            ["URL_CREATE_VERSION", "ab2", "https://version-b.com", 100],  # 100% to v2
+            ["URL_CLICK", "ab2"],
+            ["URL_CLICK", "ab2"],
+            ["URL_CLICK", "ab2"],
+            ["URL_VERSION_STATS", "ab2"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # With 100% split, all clicks should go to v2
+        self.assertIn("v1=0", output[5])
+        self.assertIn("v2=3", output[5])
+    
+    def test_level4_ab_testing_0_percent(self):
+        """Test A/B testing with 0% split"""
+        commands = [
+            ["URL_SHORTEN", "https://version-a.com", "ab3"],
+            ["URL_CREATE_VERSION", "ab3", "https://version-b.com", 0],  # 0% to v2
+            ["URL_CLICK", "ab3"],
+            ["URL_CLICK", "ab3"],
+            ["URL_VERSION_STATS", "ab3"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # With 0% split, all clicks should go to v1
+        self.assertIn("v1=2", output[4])
+        self.assertIn("v2=0", output[4])
+    
+    def test_level4_set_split(self):
+        """Test adjusting split percentage"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "split1"],
+            ["URL_CREATE_VERSION", "split1", "https://example-v2.com", 30],
+            ["URL_SET_SPLIT", "split1", 70],
+            ["URL_SET_SPLIT", "nosplit", 50]  # No v2 exists
+        ]
+        
+        expected = [
+            "shortened to split1",
+            "version 2 created: https://example-v2.com",
+            "split updated split1",
+            "error: code not found"
+        ]
+        
+        output = simulate_coding_framework(commands)
+        self.assertEqual(output, expected)
+    
+    def test_level4_version_without_v2(self):
+        """Test stats for URL without v2"""
+        commands = [
+            ["URL_SHORTEN", "https://example.com", "nov2"],
+            ["URL_CLICK", "nov2"],
+            ["URL_CLICK", "nov2"],
+            ["URL_VERSION_STATS", "nov2"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # Should show only v1 clicks
+        self.assertIn("2", output[3])
+        self.assertNotIn("v2", output[3])
+    
+    # ========== INTEGRATION TESTS ==========
+    
+    def test_complex_scenario(self):
+        """Test complex multi-level scenario"""
+        commands = [
+            ["URL_SHORTEN", "https://product.com/landing", "promo", "user1", 7200],
+            ["URL_CREATE_VERSION", "promo", "https://product.com/landing-v2", 50],
+            ["URL_CLICK", "promo"],
+            ["URL_CLICK", "promo"],
+            ["URL_CLICK", "promo"],
+            ["URL_CLICK", "promo"],
+            ["URL_VERSION_STATS", "promo"],
+            ["URL_SET_SPLIT", "promo", 80],
+            ["URL_USER_LIST", "user1"],
+            ["URL_EXPAND_AT", "2024-01-01T10:00:00", "promo"]
+        ]
+        
+        output = simulate_coding_framework(commands)
+        # Basic checks
+        self.assertEqual(output[0], "shortened to promo")
+        self.assertIn("promo", output[8])  # User list should contain promo
+        self.assertIn("valid", output[9])   # Should be valid within TTL
+
+
+if __name__ == '__main__':
+    unittest.main()
