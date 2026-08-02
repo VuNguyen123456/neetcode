@@ -1,0 +1,47 @@
+git branch // see what branch exist
+git checkout -b feature/login // create and switch to a new branch
+
+2. Do your normal workflow on the branches:
+git add .
+git commit -m "hihi"
+git push origin feature/login # push the branch itself not main
+
+3. Getting back to main/switching branch
+git checkout main
+git branch -d feature/login # delete branch after merge (optional)
+
+git branch -d <branch name> # delete after merge
+
+4. Merging (you are done with feature/login and want it in main)
+git checkout main # go to main branch
+git pull # Make sure local is up to date
+git merge feature/login # merge main with the branch -- resolve merge conflict if needed
+git push
+
+EXAMPLE:
+Starting file:
+
+    # Revenue Tracker
+    def calculate_revenue():
+        return 0
+
+git checkout -b feature/fix_calc
+
+git add . 
+git commit -m "fixed calc"
+
+# Someone change in main
+git checkout main
+git pull
+git merge feature/fix_calc
+git branch -d feature/fix_calc
+
+Round 1:
+git checkout -b feature/add-utils
+git add .
+git commit -m "util added"
+git checkout main
+git pull
+git merge feature/add-utils
+git branch -d feature/add-utils
+
