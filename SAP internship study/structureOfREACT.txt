@@ -1,0 +1,21 @@
+my-app/
+├── public/                  # static files served as-is (favicon, images)
+├── src/
+│   ├── components/          # small reusable pieces (Card, Button, Modal)
+│   │   ├── Card.js
+│   │   ├── Button.js
+│   │   └── AccountCard.js
+│   ├── pages/                # full page-level components, one per route
+│   │   ├── AccountPage.js
+│   │   ├── ProductPage.js
+│   │   └── LoginPage.js
+│   ├── context/              # context providers (like ThemeContext, UserContext)
+│   │   └── UserContext.js
+│   ├── hooks/                 # custom reusable hooks (your own useSomething)
+│   │   └── useFetchAccounts.js
+│   ├── api/                   # functions that call your backend
+│   │   └── accounts.js
+│   ├── App.js                 # root component — sets up routing, providers
+│   └── index.js                # actual entry point — renders App into the HTML page
+├── package.json
+└── node_modules/
