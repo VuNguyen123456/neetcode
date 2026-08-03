@@ -99,6 +99,17 @@ app.get('/accounts', (req, res) => {
 });
 
 // Quiz
+1.
 app.get('/users/:userId/posts/:postId', (req, res) => {
-  
+    const {userId, postId} = req.params
 });
+
+2. /products/99
+
+req.params contain this: { productId: "99" }
+
+3. False it's for the req.query.status
+
+4. app.get('/teams/:teamId/members/:memberId', (req, res) => {
+    ...
+})
