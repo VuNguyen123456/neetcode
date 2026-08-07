@@ -1,0 +1,62 @@
+<!-- XML (eXtensible Markup Language) is a way to structure data using nested tags, similar to HTML but for data instead of web pages. -->
+<Account>
+  <Name>Acme Corp</Name>
+  <Balance>5000</Balance>
+</Account>
+
+<!-- There must be exactly one root element wrapping everything — you can't have two top-level tags side by side -->
+
+<!-- INVALID — two roots, not allowed -->
+<Account>...</Account>
+<Account>...</Account>
+
+<!-- VALID — one root wrapping both -->
+<Accounts>
+  <Account>...</Account>
+  <Account>...</Account>
+</Accounts>
+
+
+<!-- The JSON equivalent, side by side -->
+<Account>
+  <Name>Acme Corp</Name>
+  <Balance>5000</Balance>
+</Account>
+
+{
+  "Account": {
+    "Name": "Acme Corp",
+    "Balance": 5000
+  }
+}
+
+<!-- Attributes — XML's one real extra feature JSON doesn't have -->
+<Account id="1001" currency="USD">
+  <Name>Acme Corp</Name>
+  <Balance>5000</Balance>
+</Account>
+<!-- id and currency are attributes — extra info attached to the tag itself, not nested content. JSON has no direct equivalent; you'd just make them regular fields: -->
+{ "id": "1001", "currency": "USD", "Name": "Acme Corp", "Balance": 5000 }
+
+Lists — repeating the same tag
+<Accounts>
+  <Account id="1001">
+    <Name>Acme Corp</Name>
+  </Account>
+  <Account id="1002">
+    <Name>Beta Inc</Name>
+  </Account>
+</Accounts>
+
+in json:
+{
+  "Order": {
+    "@id": "500",
+    "Customer": "Vu Nguyen",
+    "Items": {
+      "Item": ["Widget", "Gadget"]
+    }
+  }
+}
+
+// No special "array" syntax like JSON's [...]
